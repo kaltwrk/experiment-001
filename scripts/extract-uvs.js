@@ -4,7 +4,7 @@
  * The OBJ file has:
  * - 468 vertices (v lines)
  * - 468 texture coordinates (vt lines)
- * - Face definitions (f lines) with format: v_idx/vt_idx/vn_idx
+ * - Face definitions (f lines) with format: v_idx/vt_idx
  *
  * Run: node scripts/extract-uvs.js
  */
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const objPath = join(__dirname, '../src/lib/assets/canonical_face_model.obj');
+const objPath = join(__dirname, '../src/lib/assets/models/canonical_face_model.obj');
 const outputPath = join(__dirname, '../src/lib/utils/FaceUVs.ts');
 
 const objContent = readFileSync(objPath, 'utf-8');
