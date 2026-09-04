@@ -120,9 +120,12 @@
 			const lm = face[i];
 			if (!lm) continue;
 
-			const x = (0.5 - lm.x) * scaleX * maskScale + maskState.offsetX;
-			const y = -(lm.y - 0.5) * scaleY * maskScale + maskState.offsetY;
 			const z = -lm.z * scaleX * maskScale * depthScale + maskState.offsetZ;
+			// MediaPipe x/y are already projected screen coordinates. Moving each point
+			// along its camera ray prevents its z value from shifting it on screen again.
+			const depthRatio = (distance - z) / distance;
+			const x = ((0.5 - lm.x) * scaleX * maskScale + maskState.offsetX) * depthRatio;
+			const y = (-(lm.y - 0.5) * scaleY * maskScale + maskState.offsetY) * depthRatio;
 
 			posAttribute.setXYZ(i, x, y, z);
 		}
