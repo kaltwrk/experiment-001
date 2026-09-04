@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { T, useTask, useThrelte } from '@threlte/core';
 	import * as THREE from 'three';
+	import maskTextureUrl from '$lib/assets/textures/canonical_face_model_uv_visualization.png';
 	import { maskState } from '$lib/runes/maskState.svelte';
 	import { FACE_MESH_TRIANGULATION } from '../utils/FaceTriangulation';
 	import { FACE_MESH_UVS } from '../utils/FaceUVs';
@@ -16,6 +18,7 @@
 	let mesh = $state<THREE.Mesh>();
 	let geometry = $state<THREE.BufferGeometry>();
 	let material = $state<THREE.MeshPhysicalMaterial>();
+	let maskTexture = $state<THREE.Texture | null>(null);
 
 	const vertexCount = 468;
 	const indices = new Uint16Array(FACE_MESH_TRIANGULATION);
@@ -28,28 +31,51 @@
 		double: THREE.DoubleSide
 	};
 
+	onMount(() => {
+		let disposed = false;
+		const loader = new THREE.TextureLoader();
+
+		loader.load(maskTextureUrl, (texture) => {
+			if (disposed) {
+				texture.dispose();
+				return;
+			}
+
+			texture.flipY = false;
+			texture.colorSpace = THREE.SRGBColorSpace;
+			maskTexture = texture;
+		});
+
+		return () => {
+			disposed = true;
+			maskTexture?.dispose();
+		};
+	});
+
 	$effect(() => {
 		if (material) {
-			material.map = null;
-			material.color.set(maskState.color);
+			const useTexture = maskState.renderMode === 'texture';
+
+			material.map = useTexture ? maskTexture : null;
+			material.color.set(useTexture ? '#ffffff' : maskState.color);
 			material.opacity = maskState.opacity;
-			material.metalness = maskState.metalness;
-			material.roughness = maskState.roughness;
-			material.clearcoat = maskState.clearcoat;
-			material.clearcoatRoughness = maskState.clearcoatRoughness;
+			material.metalness = useTexture ? 0 : maskState.metalness;
+			material.roughness = useTexture ? 1 : maskState.roughness;
+			material.clearcoat = useTexture ? 0 : maskState.clearcoat;
+			material.clearcoatRoughness = useTexture ? 0 : maskState.clearcoatRoughness;
 			material.ior = maskState.ior;
-			material.transmission = maskState.transmission;
-			material.thickness = maskState.thickness;
-			material.iridescence = maskState.iridescence;
+			material.transmission = useTexture ? 0 : maskState.transmission;
+			material.thickness = useTexture ? 0 : maskState.thickness;
+			material.iridescence = useTexture ? 0 : maskState.iridescence;
 			material.iridescenceIOR = maskState.iridescenceIOR;
 			material.iridescenceThicknessRange = [
 				maskState.iridescenceThicknessMin,
 				maskState.iridescenceThicknessMax
 			];
 			material.wireframe = maskState.wireframe;
-			material.flatShading = maskState.flatShading;
+			material.flatShading = useTexture ? false : maskState.flatShading;
 			material.side = MATERIAL_SIDE[maskState.side] ?? THREE.DoubleSide;
-			material.transparent = maskState.opacity < 1 || maskState.transmission > 0;
+			material.transparent = maskState.opacity < 1 || (!useTexture && maskState.transmission > 0);
 			material.needsUpdate = true;
 		}
 	});

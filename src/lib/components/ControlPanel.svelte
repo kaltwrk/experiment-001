@@ -6,6 +6,7 @@
 	let paneContainer = $state<HTMLDivElement>();
 
 	type PanelSettings = {
+		renderMode: 'material' | 'texture';
 		scale: number;
 		offsetX: number;
 		offsetY: number;
@@ -46,6 +47,7 @@
 		if (!paneContainer) return;
 
 		const settings: PanelSettings = {
+			renderMode: maskState.renderMode,
 			scale: maskState.scale,
 			offsetX: maskState.offsetX,
 			offsetY: maskState.offsetY,
@@ -71,7 +73,7 @@
 
 		const pane = new Pane({
 			container: paneContainer,
-			title: 'Material',
+			title: 'Mask',
 			expanded: true
 		}) as Pane & TweakpaneFolder;
 
@@ -84,6 +86,14 @@
 				maskState[key] = event.value as never;
 			});
 		};
+
+		bindState(pane, 'renderMode', {
+			label: 'Mode',
+			options: {
+				Material: 'material',
+				Texture: 'texture'
+			}
+		});
 
 		const transform = pane.addFolder({ title: 'Transform', expanded: true });
 		bindState(transform, 'scale', { label: 'Scale', min: 0.5, max: 2, step: 0.01 });

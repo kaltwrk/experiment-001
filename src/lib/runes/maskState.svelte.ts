@@ -1,4 +1,6 @@
 export class MaskState {
+	renderMode = $state<'material' | 'texture'>('material');
+
 	scale = $state(1.2);
 	offsetX = $state(0);
 	offsetY = $state(0.0);
