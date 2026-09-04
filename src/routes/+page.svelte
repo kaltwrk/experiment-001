@@ -43,4 +43,15 @@
 
 	<ControlPanel />
 	<StatusOverlay {loading} error={combinedError} />
+	<div class="absolute right-3 bottom-3 text-xs font-medium mix-blend-difference">
+		<span>© 2026</span>
+		<a
+			class="underline-offset-2 transition-all duration-150 ease-out hover:underline"
+			href="https://www.madebyhex.com/"
+			target="_blank"
+		>
+			Marek Jóźwiak.
+		</a>
+		<span>Crafted with SvelteKit.</span>
+	</div>
 </div>
